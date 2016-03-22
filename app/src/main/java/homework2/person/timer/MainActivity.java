@@ -31,11 +31,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_start_stop, btn_pause_resume;
     private LinearLayout layout_timeView;
 
+    private UIReceiver receiver;
+
+    private String time_minute;
+    private String time_second;
+
     private SharedPreferences preferences;
+    private static final String data = "DATA";
     private static final String data_minute = "MINUTE";
     private static final String data_second = "SECOND";
-    private static final String data_startBtn = "START_BTN";
-    private static final String data_pauseBtn = "PAUSE_BTN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void registerBroadcastReceiver(){
-        UIReceiver receiver = new UIReceiver();
+        receiver = new UIReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(UI_UPDATE_ACTION);
         filter.addAction(TIMER_FINISH_ACTION);
@@ -160,12 +164,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     textView_minute.setText("0"+picker.getValue());
                 }
                 else textView_minute.setText(""+picker.getValue());
+                time_minute = textView_minute.getText().toString();
                 break;
             case R.id.numberPicker2:
                 if(picker.getValue()<10){
                     textView_second.setText("0"+picker.getValue());
                 }
                 else textView_second.setText(""+picker.getValue());
+                time_second = textView_second.getText().toString();
                 break;
         }
     }
@@ -182,23 +188,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         saveData();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
+
     public void saveData(){
-        preferences = getPreferences(0);
+        preferences = getSharedPreferences(data, 0);
         preferences.edit()
-                .putString(data_minute, textView_minute.getText().toString())
-                .putString(data_second, textView_second.getText().toString())
-                .putString(data_startBtn, btn_start_stop.getText().toString())
-                .putString(data_pauseBtn, btn_pause_resume.getText().toString())
+                .putString(data_minute, time_minute)
+                .putString(data_second, time_second)
                 .commit();
     }
 
     public void readData(){
-        preferences = getPreferences(0);
+        preferences = getSharedPreferences(data, 0);
         textView_minute.setText(preferences.getString(data_minute,getResources().getString(R.string.timer_init)));
         textView_second.setText(preferences.getString(data_second,getResources().getString(R.string.timer_init)));
-        btn_start_stop.setText(preferences.getString(data_startBtn,getResources().getString(R.string.start)));
-        btn_pause_resume.setText(preferences.getString(data_pauseBtn,getResources().getString(R.string.stop)));
-
     }
 
     @Override
@@ -242,6 +249,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     textView_second.setText("0"+second);
                 }
                 else textView_second.setText(""+second);
+
+                btn_start_stop.setText(getResources().getString(R.string.stop));
+                btn_pause_resume.setText(getResources().getString(R.string.pause));
+                btn_pause_resume.setEnabled(true);
             }
             else if(action.equals(TIMER_FINISH_ACTION)){
                 init_view();

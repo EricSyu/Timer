@@ -72,7 +72,7 @@ public class TimerService extends Service {
                 builder.setSmallIcon(R.drawable.clock)
                         .setWhen(System.currentTimeMillis())
                         .setContentTitle(getResources().getString(R.string.notify_title))
-                        .setContentText(getResources().getString(R.string.notify_title))
+                        .setContentText(getResources().getString(R.string.notify_content))
                         .setDefaults(Notification.DEFAULT_ALL)
                         .setVibrate(vibrate_effect)
                         .setPriority(Notification.PRIORITY_DEFAULT)
